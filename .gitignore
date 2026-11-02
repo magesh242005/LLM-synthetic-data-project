@@ -1,0 +1,23 @@
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Streamlit Local Credentials
+.streamlit/credentials.toml
+
+# IDE & OS files
+.DS_Store
+.vscode/
+.idea/
+.qodo/
+
+# Outputs / Temporary files (optional to keep data clean)
+*.log
+

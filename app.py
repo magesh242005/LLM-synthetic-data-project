@@ -25,7 +25,7 @@ import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 
-from preprocessing import DatasetPreprocessor
+from preprocessing import DatasetPreprocessor, ensure_sample_datasets
 from synthetic_generator import LLMSyntheticGenerator
 from model_training import MLPipeline
 from evaluation import (
@@ -292,20 +292,25 @@ with st.sidebar:
         index=0
     )
 
+    # Base directory for relative file paths
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    ensure_sample_datasets(BASE_DIR)
+
     # Handle preset switching
     preset_file_map = {
-        "Financial Churn & Credit Risk": "data/sample_dataset.csv",
-        "Healthcare Heart Disease & Clinical Risk": "data/sample_dataset_healthcare.csv",
-        "E-Commerce Customer Retention & CLV": "data/sample_dataset_ecommerce.csv"
+        "Financial Churn & Credit Risk": os.path.join(BASE_DIR, "data", "sample_dataset.csv"),
+        "Healthcare Heart Disease & Clinical Risk": os.path.join(BASE_DIR, "data", "sample_dataset_healthcare.csv"),
+        "E-Commerce Customer Retention & CLV": os.path.join(BASE_DIR, "data", "sample_dataset_ecommerce.csv")
     }
 
     uploaded_file = None
     if preset_choice == "Upload Custom CSV Dataset":
         uploaded_file = st.file_uploader("Upload CSV File", type=["csv"])
     else:
-        file_path = preset_file_map.get(preset_choice, "data/sample_dataset.csv")
-        if os.path.exists(file_path):
-            uploaded_file = file_path
+        file_path = preset_file_map.get(preset_choice, os.path.join(BASE_DIR, "data", "sample_dataset.csv"))
+        if not os.path.exists(file_path):
+            ensure_sample_datasets(BASE_DIR)
+        uploaded_file = file_path
 
     # If user changed preset dataset
     if preset_choice != st.session_state.current_preset:
@@ -567,7 +572,7 @@ with tab2:
                 df_original=df_orig,
                 num_records=num_records_to_gen,
                 batch_size=25,
-                save_path="data/synthetic_dataset.csv",
+                save_path=os.path.join(BASE_DIR, "data", "synthetic_dataset.csv"),
                 progress_callback=update_progress,
                 epsilon=dp_epsilon if use_dp else None
             )
